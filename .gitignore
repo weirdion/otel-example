@@ -84,3 +84,8 @@ coverage.xml
 # Local testing
 localstack/
 .localstack/
+
+# Local planning/context files (not part of repo)
+CLAUDE.md
+PLAN.md
+.prompts/
