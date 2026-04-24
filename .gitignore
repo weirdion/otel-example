@@ -68,11 +68,9 @@ simulator/dist/
 
 # Layer build artifacts (installed dependencies, not source code)
 # Keep otel_common source, exclude pip-installed packages
-layers/otel-common/python/*/
-!layers/otel-common/python/otel_common/
-layers/otel-common/python/*.dist-info/
-layers/runtime-deps/python/*/
-layers/runtime-deps/python/*.dist-info/
+layers/otel-common/python/*
+!layers/otel-common/python/otel_common
+layers/runtime-deps/python/*
 !layers/runtime-deps/python/.gitkeep
 
 # Environment and secrets
