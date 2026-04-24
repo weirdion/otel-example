@@ -29,14 +29,17 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "audit" {
   }
 }
 
-resource "aws_s3_bucket_public_access_block" "audit" {
-  bucket = aws_s3_bucket.audit.id
-
-  block_public_acls       = true
-  block_public_policy     = true
-  ignore_public_acls      = true
-  restrict_public_buckets = true
-}
+# Public access block is enforced at the AWS Organization level via SCP.
+# If your account doesn't have org-level enforcement, uncomment this:
+#
+# resource "aws_s3_bucket_public_access_block" "audit" {
+#   bucket = aws_s3_bucket.audit.id
+#
+#   block_public_acls       = true
+#   block_public_policy     = true
+#   ignore_public_acls      = true
+#   restrict_public_buckets = true
+# }
 
 resource "aws_s3_bucket_lifecycle_configuration" "audit" {
   bucket = aws_s3_bucket.audit.id
