@@ -61,6 +61,12 @@ variable "kinesis_stream_arn" {
   default     = ""
 }
 
+variable "enable_kinesis_write" {
+  description = "Whether this Lambda needs Kinesis write access"
+  type        = bool
+  default     = false
+}
+
 variable "is_kinesis_consumer" {
   description = "Whether this Lambda consumes from Kinesis"
   type        = bool

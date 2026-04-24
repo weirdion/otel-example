@@ -68,13 +68,13 @@ resource "aws_iam_role_policy_attachment" "lambda_basic" {
 
 # Kinesis write policy (for API Lambdas)
 resource "aws_iam_role_policy_attachment" "kinesis_write" {
-  count      = var.kinesis_stream_arn != "" && !var.is_kinesis_consumer ? 1 : 0
+  count      = var.enable_kinesis_write ? 1 : 0
   role       = aws_iam_role.lambda.name
   policy_arn = aws_iam_policy.kinesis_write[0].arn
 }
 
 resource "aws_iam_policy" "kinesis_write" {
-  count       = var.kinesis_stream_arn != "" && !var.is_kinesis_consumer ? 1 : 0
+  count       = var.enable_kinesis_write ? 1 : 0
   name        = "${var.name_prefix}-${var.function_name}-kinesis-write"
   description = "Allow Lambda to write to Kinesis"
 

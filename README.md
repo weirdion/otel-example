@@ -224,6 +224,9 @@ All endpoints require headers:
 - `X-Org-Id`: Organization identifier
 - `X-Session-Id`: (Optional) Session identifier
 
+> **⚠️ Security Note:** The API Gateway endpoints are **publicly accessible** with no authentication. This is intentional for a learning/demo project. **For production use, add authentication** via JWT authorizer, Lambda authorizer, or IAM auth. See [API Gateway authorization](https://docs.aws.amazon.com/apigateway/latest/developerguide/http-api-access-control.html).
+- `X-Session-Id`: (Optional) Session identifier
+
 ## Span Attributes
 
 Every span includes these standard attributes for security and audit:

@@ -69,23 +69,23 @@ check-tfvars:
 # Infrastructure targets
 init: check-glab check-tfvars
 	@echo "Initializing OpenTofu with GitLab-managed state..."
-	$(GLAB) opentofu -d $(INFRA_DIR) init $(STATE_NAME) -- -var-file=environments/dev/terraform.tfvars
+	cd $(INFRA_DIR) && $(GLAB) opentofu init $(STATE_NAME)
 
 re-init: check-glab check-tfvars
 	@echo "Re-initializing OpenTofu with GitLab-managed state..."
-	$(GLAB) opentofu -d $(INFRA_DIR) init $(STATE_NAME) -- -reconfigure -var-file=environments/dev/terraform.tfvars
+	cd $(INFRA_DIR) && $(GLAB) opentofu init $(STATE_NAME) -- -reconfigure
 
-plan: check-glab check-aws check-tfvars
+plan: check-aws check-tfvars
 	@echo "Planning infrastructure changes..."
-	$(GLAB) opentofu -d $(INFRA_DIR) plan $(STATE_NAME) -- -var-file=environments/dev/terraform.tfvars
+	cd $(INFRA_DIR) && $(TF) plan -var-file=environments/dev/terraform.tfvars
 
-apply: check-glab check-aws check-tfvars
+apply: check-aws check-tfvars
 	@echo "Applying infrastructure changes..."
-	$(GLAB) opentofu -d $(INFRA_DIR) apply $(STATE_NAME) -- -var-file=environments/dev/terraform.tfvars
+	cd $(INFRA_DIR) && $(TF) apply -var-file=environments/dev/terraform.tfvars
 
-destroy: check-glab check-aws check-tfvars
+destroy: check-aws check-tfvars
 	@echo "Destroying all infrastructure..."
-	$(GLAB) opentofu -d $(INFRA_DIR) destroy $(STATE_NAME) -- -var-file=environments/dev/terraform.tfvars
+	cd $(INFRA_DIR) && $(TF) destroy -var-file=environments/dev/terraform.tfvars
 
 # Code quality
 fmt:

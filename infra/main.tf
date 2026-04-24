@@ -66,6 +66,7 @@ module "lambda_user_actions" {
   source_dir                = "${path.root}/../backend/functions/user_actions"
   layers                    = local.api_layers
   kinesis_stream_arn        = module.kinesis.stream_arn
+  enable_kinesis_write      = true
   cloudwatch_retention_days = var.cloudwatch_retention_days
 
   environment_variables = {
@@ -85,6 +86,7 @@ module "lambda_order_service" {
   source_dir                = "${path.root}/../backend/functions/order_service"
   layers                    = local.api_layers
   kinesis_stream_arn        = module.kinesis.stream_arn
+  enable_kinesis_write      = true
   cloudwatch_retention_days = var.cloudwatch_retention_days
 
   environment_variables = {
@@ -138,6 +140,27 @@ module "consumer_newrelic" {
     POWERTOOLS_SERVICE_NAME   = "consumer-newrelic"
     LOG_LEVEL                 = "INFO"
   }
+
+  additional_policies = [aws_iam_policy.ssm_newrelic_read.arn]
+}
+
+# SSM read policy for New Relic API key
+resource "aws_iam_policy" "ssm_newrelic_read" {
+  name        = "${local.name_prefix}-ssm-newrelic-read"
+  description = "Allow reading New Relic API key from SSM Parameter Store"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "ssm:GetParameter"
+        ]
+        Resource = "arn:aws:ssm:${var.aws_region}:*:parameter${var.newrelic_api_key_param}"
+      }
+    ]
+  })
 }
 
 # -----------------------------------------------------------------------------
