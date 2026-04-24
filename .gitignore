@@ -11,6 +11,10 @@ override.tf.json
 *_override.tf
 *_override.tf.json
 
+# tfvars (use .tfvars.example as template)
+*.tfvars
+!*.tfvars.example
+
 # Python
 __pycache__/
 *.py[cod]

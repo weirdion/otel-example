@@ -1,0 +1,13 @@
+# Copy this file to terraform.tfvars and customize for your environment
+# cp terraform.tfvars.example terraform.tfvars
+
+aws_region  = "us-east-2"
+environment = "dev"
+
+# Retention policies
+kinesis_retention_hours   = 24
+s3_retention_days         = 30
+cloudwatch_retention_days = 7
+
+# New Relic (optional - leave empty to skip New Relic export)
+newrelic_account_id = ""

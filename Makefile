@@ -54,24 +54,36 @@ check-glab:
 check-aws:
 	@aws sts get-caller-identity > /dev/null 2>&1 || (echo "Error: AWS credentials not configured. See 'make help' for options." && exit 1)
 
+# tfvars file (copy from .example if not exists)
+TFVARS_FILE := $(INFRA_DIR)/environments/dev/terraform.tfvars
+TFVARS_EXAMPLE := $(TFVARS_FILE).example
+
+check-tfvars:
+	@if [ ! -f "$(TFVARS_FILE)" ]; then \
+		echo "Error: $(TFVARS_FILE) not found"; \
+		echo "Create it from the example:"; \
+		echo "  cp $(TFVARS_EXAMPLE) $(TFVARS_FILE)"; \
+		exit 1; \
+	fi
+
 # Infrastructure targets
-init: check-glab
+init: check-glab check-tfvars
 	@echo "Initializing OpenTofu with GitLab-managed state..."
 	$(GLAB) opentofu -d $(INFRA_DIR) init $(STATE_NAME) -- -var-file=environments/dev/terraform.tfvars
 
-re-init: check-glab
+re-init: check-glab check-tfvars
 	@echo "Re-initializing OpenTofu with GitLab-managed state..."
 	$(GLAB) opentofu -d $(INFRA_DIR) init $(STATE_NAME) -- -reconfigure -var-file=environments/dev/terraform.tfvars
 
-plan: check-glab check-aws
+plan: check-glab check-aws check-tfvars
 	@echo "Planning infrastructure changes..."
 	$(GLAB) opentofu -d $(INFRA_DIR) plan $(STATE_NAME) -- -var-file=environments/dev/terraform.tfvars
 
-apply: check-glab check-aws
+apply: check-glab check-aws check-tfvars
 	@echo "Applying infrastructure changes..."
 	$(GLAB) opentofu -d $(INFRA_DIR) apply $(STATE_NAME) -- -var-file=environments/dev/terraform.tfvars
 
-destroy: check-glab check-aws
+destroy: check-glab check-aws check-tfvars
 	@echo "Destroying all infrastructure..."
 	$(GLAB) opentofu -d $(INFRA_DIR) destroy $(STATE_NAME) -- -var-file=environments/dev/terraform.tfvars
 
