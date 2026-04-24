@@ -1,0 +1,111 @@
+.PHONY: help init plan apply destroy fmt validate clean
+
+# Default target
+help:
+	@echo "OTel Demo - Makefile"
+	@echo ""
+	@echo "Infrastructure targets:"
+	@echo "  init      - Initialize OpenTofu with GitLab-managed state"
+	@echo "  re-init   - Re-initialize with -reconfigure"
+	@echo "  plan      - Plan infrastructure changes"
+	@echo "  apply     - Apply infrastructure changes"
+	@echo "  destroy   - Destroy all infrastructure"
+	@echo ""
+	@echo "Code quality:"
+	@echo "  fmt       - Format all OpenTofu files"
+	@echo "  validate  - Validate OpenTofu configuration"
+	@echo ""
+	@echo "Development:"
+	@echo "  build-layer   - Build the OTel Lambda layer"
+	@echo "  build-lambdas - Build all Lambda functions"
+	@echo "  test          - Run all tests"
+	@echo ""
+	@echo "Utilities:"
+	@echo "  clean     - Clean build artifacts"
+	@echo ""
+	@echo "Requirements:"
+	@echo "  - glab CLI (>= 1.66)"
+	@echo "  - OpenTofu (>= 1.6)"
+	@echo "  - AWS CLI with SSO configured (profile: dev-admin)"
+	@echo ""
+	@echo "Usage:"
+	@echo "  export AWS_PROFILE=dev-admin"
+	@echo "  aws sso login"
+	@echo "  make init && make plan"
+
+# Directories
+INFRA_DIR := infra
+ENV_DIR := $(INFRA_DIR)/environments/dev
+
+# Tools
+TF := tofu
+GLAB := glab
+
+# State name for GitLab
+STATE_NAME := otel-demo
+
+# Check dependencies
+check-glab:
+	@which $(GLAB) > /dev/null || (echo "Error: glab CLI not found. Install from: https://gitlab.com/gitlab-org/cli" && exit 1)
+
+check-aws:
+	@aws sts get-caller-identity > /dev/null 2>&1 || (echo "Error: AWS credentials not configured. Run 'aws sso login --profile dev-admin'" && exit 1)
+
+# Infrastructure targets
+init: check-glab
+	@echo "Initializing OpenTofu with GitLab-managed state..."
+	$(GLAB) opentofu -d $(INFRA_DIR) init $(STATE_NAME) -- -var-file=environments/dev/terraform.tfvars
+
+re-init: check-glab
+	@echo "Re-initializing OpenTofu with GitLab-managed state..."
+	$(GLAB) opentofu -d $(INFRA_DIR) init $(STATE_NAME) -- -reconfigure -var-file=environments/dev/terraform.tfvars
+
+plan: check-glab check-aws
+	@echo "Planning infrastructure changes..."
+	$(GLAB) opentofu -d $(INFRA_DIR) plan $(STATE_NAME) -- -var-file=environments/dev/terraform.tfvars
+
+apply: check-glab check-aws
+	@echo "Applying infrastructure changes..."
+	$(GLAB) opentofu -d $(INFRA_DIR) apply $(STATE_NAME) -- -var-file=environments/dev/terraform.tfvars
+
+destroy: check-glab check-aws
+	@echo "Destroying all infrastructure..."
+	$(GLAB) opentofu -d $(INFRA_DIR) destroy $(STATE_NAME) -- -var-file=environments/dev/terraform.tfvars
+
+# Code quality
+fmt:
+	@echo "Formatting OpenTofu files..."
+	$(TF) fmt -recursive $(INFRA_DIR)
+
+validate: check-glab
+	@echo "Validating OpenTofu configuration..."
+	cd $(INFRA_DIR) && $(TF) validate
+
+# Build targets
+build-layer:
+	@echo "Building OTel Lambda layer..."
+	cd layers/otel-common && pip install -r requirements.txt -t python/ --upgrade
+	cd layers/otel-common && zip -r ../otel-layer.zip python/
+
+build-lambdas:
+	@echo "Building Lambda functions..."
+	@for dir in backend/functions/*/; do \
+		echo "Building $${dir}..."; \
+		cd $${dir} && pip install -r requirements.txt -t . --upgrade && cd -; \
+	done
+
+# Test targets
+test:
+	@echo "Running tests..."
+	cd backend && python -m pytest tests/ -v
+
+# Clean
+clean:
+	@echo "Cleaning build artifacts..."
+	find . -type d -name ".terraform" -exec rm -rf {} + 2>/dev/null || true
+	find . -name ".terraform.lock.hcl" -delete 2>/dev/null || true
+	find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
+	find . -type d -name "*.egg-info" -exec rm -rf {} + 2>/dev/null || true
+	find . -name "*.zip" -delete 2>/dev/null || true
+	rm -rf layers/otel-common/python/ 2>/dev/null || true
+	@echo "Clean complete"
