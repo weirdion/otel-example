@@ -26,8 +26,8 @@ from otel_common import (
     set_standard_attributes,
 )
 
-from backend.shared.models import Order, OrderItem
-from backend.shared.schemas import (
+from shared.models import Order, OrderItem
+from shared.schemas import (
     CreateOrderRequest,
     CreateOrderResponse,
     ErrorResponse,

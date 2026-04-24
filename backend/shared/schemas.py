@@ -9,7 +9,7 @@ from datetime import datetime
 from typing import Optional
 from uuid import UUID
 
-from backend.shared.models import OrderItem, OrderStatus
+from .models import OrderItem, OrderStatus
 from pydantic import BaseModel, Field
 
 # =============================================================================

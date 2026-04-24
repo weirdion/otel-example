@@ -25,9 +25,8 @@ from otel_common import (
     init_telemetry,
     set_standard_attributes,
 )
-
-from backend.shared.models import UserAction
-from backend.shared.schemas import (
+from shared.models import UserAction
+from shared.schemas import (
     CreateActionRequest,
     CreateActionResponse,
     ErrorResponse,

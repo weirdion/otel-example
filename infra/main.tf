@@ -114,9 +114,10 @@ module "consumer_s3" {
   is_kinesis_consumer       = true
 
   environment_variables = {
-    AUDIT_BUCKET_NAME       = module.s3.bucket_name
-    POWERTOOLS_SERVICE_NAME = "consumer-s3"
-    LOG_LEVEL               = "INFO"
+    AUDIT_BUCKET_NAME            = module.s3.bucket_name
+    POWERTOOLS_SERVICE_NAME      = "consumer-s3"
+    POWERTOOLS_METRICS_NAMESPACE = var.project_name
+    LOG_LEVEL                    = "INFO"
   }
 
   additional_policies = [module.s3.write_policy_arn]
@@ -135,10 +136,11 @@ module "consumer_newrelic" {
   is_kinesis_consumer       = true
 
   environment_variables = {
-    NEWRELIC_ACCOUNT_ID       = var.newrelic_account_id
-    NEWRELIC_API_KEY_PARAM    = var.newrelic_api_key_param
-    POWERTOOLS_SERVICE_NAME   = "consumer-newrelic"
-    LOG_LEVEL                 = "INFO"
+    NEWRELIC_ACCOUNT_ID          = var.newrelic_account_id
+    NEWRELIC_API_KEY_PARAM       = var.newrelic_api_key_param
+    POWERTOOLS_SERVICE_NAME      = "consumer-newrelic"
+    POWERTOOLS_METRICS_NAMESPACE = var.project_name
+    LOG_LEVEL                    = "INFO"
   }
 
   additional_policies = [aws_iam_policy.ssm_newrelic_read.arn]

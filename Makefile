@@ -114,6 +114,9 @@ build-runtime-layer:
 	@echo "Building runtime dependencies layer (linux/arm64)..."
 	rm -rf layers/runtime-deps/python/* 2>/dev/null || true
 	$(PIP_DOCKER) pip install -r layers/runtime-deps/requirements.txt -t layers/runtime-deps/python/ --upgrade --quiet
+	@# Copy shared models/schemas into the layer
+	cp -r backend/shared layers/runtime-deps/python/shared
+	rm -rf layers/runtime-deps/python/shared/__pycache__ 2>/dev/null || true
 	@echo "Runtime layer size: $$(du -sh layers/runtime-deps/python | cut -f1)"
 
 # Local builds (for testing on Mac, won't work on Lambda)
@@ -125,8 +128,10 @@ build-otel-layer-local:
 
 build-runtime-layer-local:
 	pip install -r layers/runtime-deps/requirements.txt -t layers/runtime-deps/python/ --upgrade --quiet
+	cp -r backend/shared layers/runtime-deps/python/shared
+	rm -rf layers/runtime-deps/python/shared/__pycache__ 2>/dev/null || true
 
-# Note: Lambda functions only contain handler code, deps come from layers
+# Lambda functions use layers for all dependencies including shared code
 build-lambdas:
 	@echo "Lambda functions use layers for dependencies - no build needed"
 	@echo "Run 'make build-layers' to build dependency layers"

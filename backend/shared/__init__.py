@@ -1,12 +1,12 @@
 """Shared models and utilities for Lambda functions."""
 
-from backend.shared.models import (
+from .models import (
     UserAction,
     Order,
     OrderItem,
     OrderStatus,
 )
-from backend.shared.schemas import (
+from .schemas import (
     CreateActionRequest,
     CreateActionResponse,
     CreateOrderRequest,
