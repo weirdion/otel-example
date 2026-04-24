@@ -24,13 +24,16 @@ help:
 	@echo "  clean     - Clean build artifacts"
 	@echo ""
 	@echo "Requirements:"
-	@echo "  - glab CLI (>= 1.66)"
-	@echo "  - OpenTofu (>= 1.6)"
-	@echo "  - AWS CLI with SSO configured (profile: dev-admin)"
+	@echo "  - glab CLI (>= 1.66) - https://gitlab.com/gitlab-org/cli"
+	@echo "  - OpenTofu (>= 1.6) - https://opentofu.org"
+	@echo "  - AWS CLI with valid credentials"
 	@echo ""
 	@echo "Usage:"
-	@echo "  export AWS_PROFILE=dev-admin"
-	@echo "  aws sso login"
+	@echo "  # Configure AWS credentials (choose one method):"
+	@echo "  # - Environment variables: AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY"
+	@echo "  # - AWS profile: aws configure"
+	@echo "  # - AWS SSO: aws sso login --profile <your-profile>"
+	@echo ""
 	@echo "  make init && make plan"
 
 # Directories
@@ -49,7 +52,7 @@ check-glab:
 	@which $(GLAB) > /dev/null || (echo "Error: glab CLI not found. Install from: https://gitlab.com/gitlab-org/cli" && exit 1)
 
 check-aws:
-	@aws sts get-caller-identity > /dev/null 2>&1 || (echo "Error: AWS credentials not configured. Run 'aws sso login --profile dev-admin'" && exit 1)
+	@aws sts get-caller-identity > /dev/null 2>&1 || (echo "Error: AWS credentials not configured. See 'make help' for options." && exit 1)
 
 # Infrastructure targets
 init: check-glab
