@@ -4,7 +4,7 @@ Domain models for the OTel demo.
 These models represent the core business entities.
 """
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime, timezone
 from enum import Enum
 from typing import Optional
 from uuid import UUID, uuid4
@@ -78,8 +78,8 @@ class Order(BaseModel):
     org_id: str
     items: list[OrderItem] = Field(min_length=1)
     status: OrderStatus = OrderStatus.PENDING
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
     notes: Optional[str] = None
 
     @property
