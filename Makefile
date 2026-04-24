@@ -82,17 +82,24 @@ validate: check-glab
 	cd $(INFRA_DIR) && $(TF) validate
 
 # Build targets
-build-layer:
-	@echo "Building OTel Lambda layer..."
-	cd layers/otel-common && pip install -r requirements.txt -t python/ --upgrade
-	cd layers/otel-common && zip -r ../otel-layer.zip python/
+build-layers: build-otel-layer build-runtime-layer
+	@echo "All layers built successfully"
 
+build-otel-layer:
+	@echo "Building OTel Lambda layer..."
+	rm -rf layers/otel-common/python/otel_common/__pycache__ 2>/dev/null || true
+	pip install -r layers/otel-common/requirements.txt -t layers/otel-common/python/ --upgrade --quiet
+
+build-runtime-layer:
+	@echo "Building runtime dependencies layer..."
+	rm -rf layers/runtime-deps/python/* 2>/dev/null || true
+	pip install -r layers/runtime-deps/requirements.txt -t layers/runtime-deps/python/ --upgrade --quiet
+	@echo "Runtime layer size: $$(du -sh layers/runtime-deps/python | cut -f1)"
+
+# Note: Lambda functions only contain handler code, deps come from layers
 build-lambdas:
-	@echo "Building Lambda functions..."
-	@for dir in backend/functions/*/; do \
-		echo "Building $${dir}..."; \
-		cd $${dir} && pip install -r requirements.txt -t . --upgrade && cd -; \
-	done
+	@echo "Lambda functions use layers for dependencies - no build needed"
+	@echo "Run 'make build-layers' to build dependency layers"
 
 # Test targets
 test:
@@ -103,9 +110,12 @@ test:
 clean:
 	@echo "Cleaning build artifacts..."
 	find . -type d -name ".terraform" -exec rm -rf {} + 2>/dev/null || true
+	find . -type d -name ".build" -exec rm -rf {} + 2>/dev/null || true
 	find . -name ".terraform.lock.hcl" -delete 2>/dev/null || true
 	find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
 	find . -type d -name "*.egg-info" -exec rm -rf {} + 2>/dev/null || true
 	find . -name "*.zip" -delete 2>/dev/null || true
-	rm -rf layers/otel-common/python/ 2>/dev/null || true
+	find layers/otel-common/python -mindepth 1 -maxdepth 1 ! -name 'otel_common' -exec rm -rf {} + 2>/dev/null || true
+	rm -rf layers/runtime-deps/python/* 2>/dev/null || true
+	touch layers/runtime-deps/python/.gitkeep
 	@echo "Clean complete"

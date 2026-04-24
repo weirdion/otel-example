@@ -40,9 +40,8 @@ variable "newrelic_account_id" {
   default     = ""
 }
 
-variable "newrelic_api_key" {
-  description = "New Relic Ingest API key (stored in SSM Parameter Store)"
+variable "newrelic_api_key_param" {
+  description = "SSM Parameter Store path for New Relic Ingest API key"
   type        = string
-  default     = ""
-  sensitive   = true
+  default     = "/otel-demo/newrelic/api-key"
 }
