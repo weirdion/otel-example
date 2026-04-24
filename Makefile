@@ -97,19 +97,34 @@ validate: check-glab
 	cd $(INFRA_DIR) && $(TF) validate
 
 # Build targets
+# Uses Docker to build for Lambda's Amazon Linux ARM64 (Graviton2) platform
+DOCKER_PLATFORM := --platform linux/arm64
+PIP_DOCKER := docker run --rm $(DOCKER_PLATFORM) -v "$$(pwd)":/var/task public.ecr.aws/sam/build-python3.13:latest
+
 build-layers: build-otel-layer build-runtime-layer
 	@echo "All layers built successfully"
 
 build-otel-layer:
-	@echo "Building OTel Lambda layer..."
+	@echo "Building OTel Lambda layer (linux/arm64)..."
 	rm -rf layers/otel-common/python/otel_common/__pycache__ 2>/dev/null || true
-	pip install -r layers/otel-common/requirements.txt -t layers/otel-common/python/ --upgrade --quiet
+	$(PIP_DOCKER) pip install -r layers/otel-common/requirements.txt -t layers/otel-common/python/ --upgrade --quiet
+	@echo "OTel layer size: $$(du -sh layers/otel-common/python | cut -f1)"
 
 build-runtime-layer:
-	@echo "Building runtime dependencies layer..."
+	@echo "Building runtime dependencies layer (linux/arm64)..."
 	rm -rf layers/runtime-deps/python/* 2>/dev/null || true
-	pip install -r layers/runtime-deps/requirements.txt -t layers/runtime-deps/python/ --upgrade --quiet
+	$(PIP_DOCKER) pip install -r layers/runtime-deps/requirements.txt -t layers/runtime-deps/python/ --upgrade --quiet
 	@echo "Runtime layer size: $$(du -sh layers/runtime-deps/python | cut -f1)"
+
+# Local builds (for testing on Mac, won't work on Lambda)
+build-layers-local: build-otel-layer-local build-runtime-layer-local
+	@echo "Local layers built (for testing only, not for Lambda)"
+
+build-otel-layer-local:
+	pip install -r layers/otel-common/requirements.txt -t layers/otel-common/python/ --upgrade --quiet
+
+build-runtime-layer-local:
+	pip install -r layers/runtime-deps/requirements.txt -t layers/runtime-deps/python/ --upgrade --quiet
 
 # Note: Lambda functions only contain handler code, deps come from layers
 build-lambdas:

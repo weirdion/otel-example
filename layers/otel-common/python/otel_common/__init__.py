@@ -17,6 +17,7 @@ from otel_common.attributes import (
     ActionAttributes,
     set_user_context,
     set_action_attributes,
+    set_standard_attributes,
 )
 from otel_common.exporters import KinesisSpanExporter
 
@@ -30,6 +31,7 @@ __all__ = [
     "ActionAttributes",
     "set_user_context",
     "set_action_attributes",
+    "set_standard_attributes",
     # Exporters
     "KinesisSpanExporter",
 ]
